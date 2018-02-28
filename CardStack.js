@@ -138,10 +138,10 @@ export default class CardStack extends Component {
   componentWillReceiveProps(nextProps){
     if (nextProps.children !== this.props.children) {
       this.setState({
-      cards: nextProps.children,
-      cardA: nextProps.children[0],
-      cardB: nextProps.children[1],
-    });
+        cards: nextProps.children,
+        cardA: nextProps.children[(this.state.topCard=='cardA')? this.state.sindex-2 : this.state.sindex-1],
+        cardB: nextProps.children[(this.state.topCard=='cardB')? this.state.sindex-2 : this.state.sindex-1]
+      });
     }
   }
 
@@ -267,65 +267,69 @@ export default class CardStack extends Component {
     const { verticalSwipe, horizontalSwipe } = this.props;
     const { sindex, cards, topCard } = this.state;
 
-    switch (direction) {
-      case 'left':
-        this.props.onSwipedLeft();
-        this.state.cards[sindex-2].props.onSwipedLeft();
-        break;
-      case 'right':
-        this.props.onSwipedRight();
-        this.state.cards[sindex-2].props.onSwipedRight();
-        break;
-      case 'top':
-        this.props.onSwipedTop();
-        this.state.cards[sindex-2].props.onSwipedTop();
-        break;
-      case 'bottom':
-        this.props.onSwipedBottom();
-        this.state.cards[sindex-2].props.onSwipedBottom();
-        break;
-      default:
+    if((sindex-2) < cards.length){
+
+      switch (direction) {
+        case 'left':
+          this.props.onSwipedLeft();
+          this.state.cards[sindex-2].props.onSwipedLeft();
+          break;
+        case 'right':
+          this.props.onSwipedRight();
+          this.state.cards[sindex-2].props.onSwipedRight();
+          break;
+        case 'top':
+          this.props.onSwipedTop();
+          this.state.cards[sindex-2].props.onSwipedTop();
+          break;
+        case 'bottom':
+          this.props.onSwipedBottom();
+          this.state.cards[sindex-2].props.onSwipedBottom();
+          break;
+        default:
+
+      }
+      Animated.spring(
+        this.state.dragDistance,
+        {
+          toValue: 220,
+          duration,
+        }
+      ).start();
+      Animated.timing(
+        this.state.drag,
+        {
+          toValue: { x: (horizontalSwipe) ? x : 0, y: (verticalSwipe) ? y : 0 },
+          duration,
+        }
+      ).start(() => {
+
+        this.props.onSwiped();
+        const newTopCard =  (topCard === 'cardA') ? 'cardB' : 'cardA';
+
+        let update = {};
+        if(newTopCard === 'cardA') {
+          update = {
+            ...update,
+            cardB: cards[sindex]
+          };
+        }
+        if(newTopCard === 'cardB') {
+          update = {
+            ...update,
+            cardA: cards[sindex],
+          };
+        }
+        this.state.drag.setValue({x: 0, y:0});
+        this.state.dragDistance.setValue(0);
+        this.setState({
+          ...update,
+          topCard: newTopCard,
+          sindex: (this.props.loop && (sindex+1 >= cards.length)) ? 0 : sindex+1
+        });
+      });
 
     }
-    Animated.spring(
-      this.state.dragDistance,
-      {
-        toValue: 220,
-        duration,
-      }
-    ).start();
-    Animated.timing(
-      this.state.drag,
-      {
-        toValue: { x: (horizontalSwipe) ? x : 0, y: (verticalSwipe) ? y : 0 },
-        duration,
-      }
-    ).start(() => {
-
-      this.props.onSwiped();
-      const newTopCard =  (topCard === 'cardA') ? 'cardB' : 'cardA';
-
-      let update = {};
-      if(newTopCard === 'cardA') {
-        update = {
-          ...update,
-          cardB: cards[sindex]
-        };
-      }
-      if(newTopCard === 'cardB') {
-        update = {
-          ...update,
-          cardA: cards[sindex],
-        };
-      }
-      this.state.drag.setValue({x: 0, y:0});
-      this.state.dragDistance.setValue(0);
-      this.setState({
-        ...update,
-        topCard: newTopCard,
-        sindex: (this.props.loop && (sindex+1 >= cards.length)) ? 0 : sindex+1
-      });
-    });
   }
 
 
