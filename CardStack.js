@@ -125,11 +125,17 @@ export default class CardStack extends Component {
   }
 
   componentWillReceiveProps(nextProps){
+    let aIndex = (this.state.topCard == 'cardA') ? this.state.sindex - 2 : this.state.sindex - 1;
+    let bIndex = (this.state.topCard == 'cardB') ? this.state.sindex - 2 : this.state.sindex - 1;
+
+    aIndex = aIndex < 0 ? nextProps.children.length + aIndex : aIndex;
+    bIndex = bIndex < 0 ? nextProps.children.length + bIndex : bIndex;
+
     if (nextProps.children !== this.props.children) {
       this.setState({
         cards: nextProps.children,
-        cardA: nextProps.children[(this.state.topCard=='cardA')? this.state.sindex-2 : this.state.sindex-1],
-        cardB: nextProps.children[(this.state.topCard=='cardB')? this.state.sindex-2 : this.state.sindex-1]
+        cardA: nextProps.children[aIndex],
+        cardB: nextProps.children[bIndex],
       });
     }
   }
@@ -372,8 +378,10 @@ export default class CardStack extends Component {
         <View {...this._panResponder.panHandlers} style={[{position:'relative'},this.props.style]}>
           <Animated.View style={{
                 position: 'absolute',
-                zIndex: (topCard === 'cardB') ? 3 : 2,
                 ...Platform.select({
+                  ios: {
+                    zIndex: (topCard === 'cardB') ? 3 : 2,
+                  },
                   android: {
                     elevation: (topCard === 'cardB') ? 3 : 2,
                   }
@@ -389,8 +397,10 @@ export default class CardStack extends Component {
           </Animated.View>
           <Animated.View style={{
                 position: 'absolute',
-                zIndex: (topCard === 'cardA') ? 3 : 2,
                 ...Platform.select({
+                  ios: {
+                    zIndex: (topCard === 'cardA') ? 3 : 2,
+                  },
                   android: {
                     elevation: (topCard === 'cardA') ? 3 : 2,
                   }
