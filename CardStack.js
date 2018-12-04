@@ -370,6 +370,14 @@ export default class CardStack extends Component {
   }
 
 
+  /**
+   * @description CardB’s click feature is trigger the CardA on the card stack. (Solved on Android)
+   * @see https://facebook.github.io/react-native/docs/view#pointerevents
+   */
+  _setPointerEvents(topCard, topCardName) {
+    return { pointerEvents: topCard === topCardName ? "auto" : "none" }
+  }  
+
   render() {
 
     const { secondCardZoom } = this.props;
@@ -391,12 +399,12 @@ export default class CardStack extends Component {
 
           {this.props.renderNoMoreCards()}
 
-          <Animated.View style={{
+          <Animated.View 
+              {...this._setPointerEvents(topCard, 'cardB')}
+              style={{
                 position: 'absolute',
+                zIndex: (topCard === 'cardB') ? 3 : 2,
                 ...Platform.select({
-                  ios: {
-                    zIndex: (topCard === 'cardB') ? 3 : 2,
-                  },
                   android: {
                     elevation: (topCard === 'cardB') ? 3 : 2,
                   }
@@ -410,12 +418,12 @@ export default class CardStack extends Component {
               }}>
               {cardB}
           </Animated.View>
-          <Animated.View style={{
+          <Animated.View 
+              {...this._setPointerEvents(topCard, 'cardA')}
+              style={{
                 position: 'absolute',
+                zIndex: (topCard === 'cardA') ? 3 : 2,
                 ...Platform.select({
-                  ios: {
-                    zIndex: (topCard === 'cardA') ? 3 : 2,
-                  },
                   android: {
                     elevation: (topCard === 'cardA') ? 3 : 2,
                   }
@@ -495,5 +503,5 @@ CardStack.defaultProps = {
   outputRotationRange: ['-15deg','0deg','15deg'],
   duration: 200
 
-
+  
 }
